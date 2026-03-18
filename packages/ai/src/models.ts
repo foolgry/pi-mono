@@ -12,6 +12,44 @@ for (const [provider, models] of Object.entries(MODELS)) {
 	modelRegistry.set(provider, providerModels);
 }
 
+interface ModelFallbackAlias {
+	provider: "minimax" | "minimax-cn";
+	id: string;
+	name: string;
+}
+
+const MINIMAX_FALLBACK_SOURCE_IDS = ["MiniMax-M2.5", "MiniMax-M2.1", "MiniMax-M2"] as const;
+
+const MINIMAX_FALLBACK_ALIASES: readonly ModelFallbackAlias[] = [
+	{ provider: "minimax", id: "MiniMax-M2.7", name: "MiniMax-M2.7" },
+	{ provider: "minimax-cn", id: "MiniMax-M2.7", name: "MiniMax-M2.7" },
+];
+
+function registerModelFallbackAliases(): void {
+	for (const alias of MINIMAX_FALLBACK_ALIASES) {
+		const providerModels = modelRegistry.get(alias.provider);
+		if (!providerModels || providerModels.has(alias.id)) {
+			continue;
+		}
+
+		const sourceModel = MINIMAX_FALLBACK_SOURCE_IDS
+			.map((modelId) => providerModels.get(modelId))
+			.find((model): model is Model<Api> => model !== undefined);
+
+		if (!sourceModel) {
+			continue;
+		}
+
+		providerModels.set(alias.id, {
+			...sourceModel,
+			id: alias.id,
+			name: alias.name,
+		});
+	}
+}
+
+registerModelFallbackAliases();
+
 type ModelApi<
 	TProvider extends KnownProvider,
 	TModelId extends keyof (typeof MODELS)[TProvider],

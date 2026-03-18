@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added fallback `MiniMax-M2.7` model entries for `minimax` and `minimax-cn` providers so the new model can be selected before upstream model catalogs include it.
+
 ## [0.60.0] - 2026-03-18
 
 ### Fixed
